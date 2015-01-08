@@ -1,7 +1,7 @@
 *Dr Package*
 ==========
 
-Utility for collecting CommonJS packages for [ColaScript](https://github.com/TrigenSoftware/ColaScript).
+Utility for [collecting CommonJS packages](https://github.com/TrigenSoftware/ColaScript/wiki/Modules) for [ColaScript](https://github.com/TrigenSoftware/ColaScript).
 
 ## Installation
 
