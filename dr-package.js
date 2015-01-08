@@ -8,6 +8,11 @@ const FS = require("fs");
 
 const Path = require("path");
 
+function getJson() {
+    var filename = arguments[0] !== undefined ? arguments[0] : _ColaRuntime$$error("Argument `filename` is required!");
+    return JSON.parse(FS.readFileSync(filename, "utf8"));
+}
+
 function tryToFindSource() {
     var filename = arguments[0] !== undefined ? arguments[0] : _ColaRuntime$$error("Argument `filename` is required!"), strict = arguments[1] !== undefined ? arguments[1] : false;
     var result;
@@ -17,12 +22,12 @@ function tryToFindSource() {
     if (!strict && FS.existsSync(result = "" + filename + ".js")) {
         return "./" + result;
     }
-    return false;
+    return "";
 }
 
 function handlePackage() {
     var file = arguments[0] !== undefined ? arguments[0] : _ColaRuntime$$error("Argument `file` is required!"), modules = arguments[1] !== undefined ? arguments[1] : _ColaRuntime$$error("Argument `modules` is required!");
-    var pkg = require("./" + file), path = Path.dirname(file), index;
+    var pkg = getJson("./" + file), path = Path.dirname(file), index;
     if (index = tryToFindSource("" + path + "/index.js", true)) {
         return modules[pkg.name] = index;
     }

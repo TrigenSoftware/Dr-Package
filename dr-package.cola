@@ -5,6 +5,9 @@
 
 @export _ as resolve;
 
+Object getJson(String filename) 
+	=> JSON.parse(FS.readFileSync(filename, "utf8"));
+
 String tryToFindSource(String filename, bool strict = false) {
 	String result;
 
@@ -16,11 +19,11 @@ String tryToFindSource(String filename, bool strict = false) {
 		return "./@result";
 	}
 
-	return false;
+	return "";
 }
 
 void handlePackage(String file, Object modules) {
-	Object pkg  = require("./@file"), 
+	Object pkg  = getJson("./@file"), 
 	       path = Path.dirname(file), index;
 
 	if index = tryToFindSource("@path/index.js", true) {

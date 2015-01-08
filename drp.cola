@@ -10,6 +10,7 @@ drp <path-to-dir-with-packages> [to <path-to-packages-json>]
 
 @import "./dr-package" as drp
 @import "argue-cli"    as cli
+@import "colors"       as cs
 @import "fs"           as fs
 
 try {

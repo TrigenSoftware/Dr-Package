@@ -14,6 +14,7 @@
         "url": "https://github.com/TrigenSoftware/Dr-Package.git"
     },
     "dependencies": {
+        "colors": "~0.6.2",
         "argue-cli": "~0.0.1"
     },
     "main": "dr-package.js",

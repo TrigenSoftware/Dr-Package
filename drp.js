@@ -3,6 +3,8 @@ const drp = require("./dr-package");
 
 const cli = require("argue-cli");
 
+const cs = require("colors");
+
 const fs = require("fs");
 
 try {
