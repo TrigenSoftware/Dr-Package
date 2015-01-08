@@ -1,0 +1,38 @@
+{
+    "name": "dr-package",
+    "description": "Utility for collecting CommonJS packages for ColaScript.",
+    "homepage": "https://github.com/TrigenSoftware/Dr-Package",
+    "version": "0.1.0",
+    "engines": {
+        "node": ">=0.4.0"
+    },
+    "maintainers": [
+        "Dan Onoshko <danpn0404@gmail.com> (dangreen)"
+    ],
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/TrigenSoftware/Dr-Package.git"
+    },
+    "dependencies": {
+        "colors": "~0.6.2",
+        "shelljs": "~0.3.0",
+        "argue-cli": "~0.0.1"
+    },
+    "main": "dr-package.js",
+    "bin": {
+        "drp": "drp.js"
+    },
+    "bugs": {
+        "url": "https://github.com/TrigenSoftware/Dr-Package/issues"
+    },
+    "keywords": [
+        "ColaScript",
+        "cola",
+        "Dr Package",
+        "npm",
+        "component",
+        "CommonJS"
+    ],
+    "author": "Dan Onoshko (dangreen)",
+    "license": "MIT"
+}

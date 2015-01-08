@@ -1,0 +1,59 @@
+#!/usr/bin/env node
+
+/*
+drp <help | version>
+
+drp <path-to-dir-with-packages> [to <path-to-packages-json>]
+    e. g. drp node_modules
+    <path-to-packages-json> is "./packages.json" by default
+*/
+
+@import "./dr-package" as drp
+@import "argue-cli"    as cli
+@import "colors"       as cs
+@import "fs"           as fs
+
+try {
+
+String firstArg = cli.args[0] ? cli.read() : "./";
+
+switch firstArg {
+    when "help":
+        console.log(
+            "Example of usage:
+                drp <help | version>
+                drp [<path-to-dir-with-packages> [to <path-to-packages-json>]]
+                    <path-to-dir-with-packages> is \"./\" by default
+                    <path-to-packages-json>     is \"./packages.json\" by default
+            "
+        );
+
+        process.exit();
+
+    when "version": 
+        Object json = require("./package.json");
+        console.log(json.name + ' ' + json.version);
+        process.exit();
+
+    default:
+        String output   = "./packages.json",
+               packages = JSON.stringify(drp.resolve(firstArg), null, "\t");
+
+        if cli.args[0] == "to" {
+            cli.read();
+            output = cli.read();
+
+            fs.writeFileSync(/\/$/.test(output) 
+                ? "@output/packages.json" 
+                : output, packages, "utf8");
+        } else {
+            fs.writeFileSync(output, packages, "utf8");
+        }
+
+        cli.end();
+}
+
+} catch (e) {
+    console.log("❗️  " + e.message.red);
+    process.exit();
+}

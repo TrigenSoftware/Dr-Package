@@ -1,0 +1,61 @@
+@use strict
+
+@import "fs"   as FS
+@import "path" as Path
+
+@export _ as resolve;
+
+String tryToFindSource(String filename, bool strict = false) {
+	String result;
+
+	if FS.existsSync(filename) {
+		return "./@filename";
+	}
+
+	if !strict && FS.existsSync(result = "@filename.js") {
+		return "./@result";
+	}
+
+	return false;
+}
+
+void handlePackage(String file, Object modules) {
+	Object pkg  = require("./@file"), 
+	       path = Path.dirname(file), index;
+
+	if index = tryToFindSource("@path/index.js", true) {
+		return modules[pkg.name] = index;
+	}
+
+	if pkg.main && (index = tryToFindSource(Path.join(path, pkg.main))) {
+		return modules[pkg.name] = index;
+	} 
+
+	if pkg.scripts is Array && pkg.scripts[0] 
+		&& (index = tryToFindSource(Path.join(path, pkg.scripts[0]))) {
+		return modules[pkg.name] = index;
+	}
+
+	return false;
+}
+ 
+Object _(String path, Object modules = {}) {
+	Array ls = FS.readdirSync(path), handled;
+
+	ls.forEach((file) {
+		if file.indexOf(".") == 0 {
+			return;
+		}
+
+		if !handled && (file == "package.json" || file == "component.json") {
+			handled = handlePackage(Path.join(path, file), modules);
+		}
+
+		if FS.statSync(file = Path.join(path, file)).isDirectory() {
+			_(file, modules);
+		}
+	});
+
+	return modules;
+}
+
