@@ -8,9 +8,18 @@ const FS = require("fs");
 
 const Path = require("path");
 
+const NPM = require("npm");
+
+NPM.load(function() {
+    var err = arguments[0] !== undefined ? arguments[0] : _ColaRuntime$$error("Argument `err` is required!");
+});
+
+var shimModules = [ "process", "buffer", "browserify-zlib", "vm-browserify", "util", "url", "tty-browserify", "timers-browserify", "string_decoder", "stream-browserify", "querystring", "punycode", "path-browserify", "os-browserify", "https-browserify", "http-browserify", "events", "domain-browser", "crypto-browserify", "constants-browserify", "console-browserify", "assert" ];
+
 function getJson() {
     var filename = arguments[0] !== undefined ? arguments[0] : _ColaRuntime$$error("Argument `filename` is required!");
-    return JSON.parse(FS.readFileSync(filename, "utf8"));
+    var jsonSource = FS.readFileSync(filename, "utf8");
+    return jsonSource ? JSON.parse(jsonSource) : {};
 }
 
 function tryToFindSource() {
@@ -58,4 +67,26 @@ function _() {
     return modules;
 }
 
+function install() {
+    var path = arguments[0] !== undefined ? arguments[0] : _ColaRuntime$$error("Argument `path` is required!");
+    path = Path.join(path, "./browser-shim");
+    if (FS.existsSync(path)) {
+        return;
+    }
+    NPM.load(function() {
+        var err = arguments[0] !== undefined ? arguments[0] : _ColaRuntime$$error("Argument `err` is required!");
+        if (err) {
+            throw err;
+        }
+        NPM.commands.install(path, shimModules, function() {
+            var err = arguments[0] !== undefined ? arguments[0] : _ColaRuntime$$error("Argument `err` is required!");
+            if (err) {
+                throw err;
+            }
+        });
+    });
+}
+
 exports.resolve = _;
+
+exports.installShim = install;

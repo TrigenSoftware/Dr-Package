@@ -2,11 +2,42 @@
 
 @import "fs"   as FS
 @import "path" as Path
+@import "npm"  as NPM
 
 @export _ as resolve;
+@export install as installShim;
 
-Object getJson(String filename) 
-	=> JSON.parse(FS.readFileSync(filename, "utf8"));
+NPM.load((err) {});
+
+Array shimModules = [
+	"process",
+	"buffer",
+	"browserify-zlib",
+	"vm-browserify",
+	"util",
+	"url",
+	"tty-browserify",
+	"timers-browserify",
+	"string_decoder",
+	"stream-browserify",
+	"querystring",
+	"punycode",
+	"path-browserify",
+	"os-browserify",
+	"https-browserify",
+	"http-browserify",
+	"events",
+	"domain-browser",
+	"crypto-browserify",
+	"constants-browserify",
+	"console-browserify",
+	"assert"
+];
+
+Object getJson(String filename) {
+	String jsonSource = FS.readFileSync(filename, "utf8");
+	return jsonSource ? JSON.parse(jsonSource) : {};
+}
 
 String tryToFindSource(String filename, bool strict = false) {
 	String result;
@@ -62,3 +93,24 @@ Object _(String path, Object modules = {}) {
 	return modules;
 }
 
+void install(String path) {
+	path = Path.join(path, "./browser-shim");
+
+	if FS.existsSync(path) {
+		return;
+	}
+
+	NPM.load((err) {
+
+		if err {
+			throw err;
+		}
+
+	    NPM.commands.install(path, shimModules, (err) {
+	        if err {
+	        	throw err;
+	    	}
+	    });
+
+	});
+}

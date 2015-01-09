@@ -12,6 +12,7 @@ drp <path-to-dir-with-packages> [to <path-to-packages-json>]
 @import "argue-cli"    as cli
 @import "colors"       as cs
 @import "fs"           as fs
+@import "path"         as path
 
 try {
 
@@ -43,10 +44,12 @@ switch firstArg {
             cli.read();
             output = cli.read();
 
+            drp.installShim(path.dirname(output));
             fs.writeFileSync(/\/$/.test(output) 
                 ? "@output/packages.json" 
                 : output, packages, "utf8");
         } else {
+            drp.installShim(path.dirname(output));
             fs.writeFileSync(output, packages, "utf8");
         }
 

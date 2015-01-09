@@ -7,6 +7,8 @@ const cs = require("colors");
 
 const fs = require("fs");
 
+const path = require("path");
+
 try {
     var firstArg = cli.args[0] ? cli.read() : "./";
     switch (firstArg) {
@@ -26,8 +28,10 @@ try {
         if (cli.args[0] == "to") {
             cli.read();
             output = cli.read();
+            drp.installShim(path.dirname(output));
             fs.writeFileSync(/\/$/.test(output) ? "" + output + "/packages.json" : output, packages, "utf8");
         } else {
+            drp.installShim(path.dirname(output));
             fs.writeFileSync(output, packages, "utf8");
         }
         cli.end();
