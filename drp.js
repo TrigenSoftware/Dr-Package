@@ -1,4 +1,13 @@
 #!/usr/bin/env node
+var arguments;
+
+const Promise = require("promise");
+
+function _ColaRuntime$$promise(_promise, _then, _this) {
+    if (!_promise.then) throw new Error("Function is not async.");
+    _promise.then(_then.bind(_this));
+}
+
 const drp = require("./dr-package");
 
 const cli = require("argue-cli");
@@ -24,17 +33,19 @@ try {
         break;
 
       default:
-        var output = "./packages.json", packages = JSON.stringify(drp.resolve(firstArg), null, "	");
-        if (cli.args[0] == "to") {
-            cli.read();
-            output = cli.read();
-            drp.installShim(path.dirname(output));
-            fs.writeFileSync(/\/$/.test(output) ? "" + output + "/packages.json" : output, packages, "utf8");
-        } else {
-            drp.installShim(path.dirname(output));
-            fs.writeFileSync(output, packages, "utf8");
-        }
-        cli.end();
+        var _ColaRuntime$$arguments = arguments;
+        _ColaRuntime$$promise(drp.installShim(firstArg), function(_ColaRuntime$$fulfilled0, _ColaRuntime$$rejected0) {
+            arguments = _ColaRuntime$$arguments;
+            var output = "./packages.json", packages = JSON.stringify(_ColaRuntime$$fulfilled0, null, "	");
+            if (cli.args[0] == "to") {
+                cli.read();
+                output = cli.read();
+                fs.writeFileSync(/\/$/.test(output) ? "" + output + "/packages.json" : output, packages, "utf8");
+            } else {
+                fs.writeFileSync(output, packages, "utf8");
+            }
+            cli.end();
+        }, this);
     }
 } catch (e) {
     console.log("❗️  " + e.message.red);

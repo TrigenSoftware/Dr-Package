@@ -4,35 +4,47 @@
 @import "path" as Path
 @import "npm"  as NPM
 
-@export _ as resolve;
 @export install as installShim;
 
-NPM.load((err) {});
+NPM.load(() {});
 
-Array shimModules = [
-	"process",
-	"buffer",
-	"browserify-zlib",
-	"vm-browserify",
-	"util",
-	"url",
-	"tty-browserify",
-	"timers-browserify",
-	"string_decoder",
-	"stream-browserify",
-	"querystring",
-	"punycode",
-	"path-browserify",
-	"os-browserify",
-	"https-browserify",
-	"http-browserify",
-	"events",
-	"domain-browser",
-	"crypto-browserify",
-	"constants-browserify",
-	"console-browserify",
-	"assert"
-];
+Object shimModules = {
+	"process" : "process",
+	"buffer" : "buffer",
+	"browserify-zlib" : "zlib",
+	"vm-browserify" : "vm",
+	"util" : "util",
+	"url" : "vm",
+	"tty-browserify" : "tty",
+	"timers-browserify" : "timers",
+	"string_decoder" : "string_decoder",
+	"stream-browserify" : "stream",
+	"querystring" : "querystring",
+	"punycode" : "punycode",
+	"path-browserify" : "path",
+	"os-browserify" : "os",
+	"https-browserify" : "https",
+	"http-browserify" : "http",
+	"events" : "events",
+	"domain-browser" : "domain",
+	"crypto-browserify" : "crypto",
+	"constants-browserify" : "constants",
+	"console-browserify" : "console",
+	"assert" : "assert"
+};
+
+Object emptyModules = {
+	"child_process" : "empty.js",
+	"dgram" : "empty.js",
+	"dns" : "empty.js",
+	"cluster" : "empty.js",
+	"fs" : "empty.js",
+	"module" : "empty.js",
+	"net" : "empty.js",
+	"readline" : "empty.js",
+	"repl" : "empty.js",
+	"tls" : "empty.js"
+};
 
 Object getJson(String filename) {
 	String jsonSource = FS.readFileSync(filename, "utf8");
@@ -43,37 +55,41 @@ String tryToFindSource(String filename, bool strict = false) {
 	String result;
 
 	if FS.existsSync(filename) {
-		return "./@filename";
+		return filename;
 	}
 
 	if !strict && FS.existsSync(result = "@filename.js") {
-		return "./@result";
+		return result;
 	}
 
 	return "";
 }
 
 void handlePackage(String file, Object modules) {
-	Object pkg  = getJson("./@file"), 
+	Object pkg  = getJson(file), 
 	       path = Path.dirname(file), index;
+	 
+	if pkg.browser is String && (index = tryToFindSource(Path.join(path, pkg.browser))) {
+		return modules[shimModules[pkg.name] || pkg.name] = index;
+	} 
 
-	if index = tryToFindSource("@path/index.js", true) {
-		return modules[pkg.name] = index;
-	}
-
-	if pkg.main && (index = tryToFindSource(Path.join(path, pkg.main))) {
-		return modules[pkg.name] = index;
+	if pkg.main is String && (index = tryToFindSource(Path.join(path, pkg.main))) {
+		return modules[shimModules[pkg.name] || pkg.name] = index;
 	} 
 
 	if pkg.scripts is Array && pkg.scripts[0] 
 		&& (index = tryToFindSource(Path.join(path, pkg.scripts[0]))) {
-		return modules[pkg.name] = index;
+		return modules[shimModules[pkg.name] || pkg.name] = index;
+	}
+
+	if index = tryToFindSource("@path/index.js", true) {
+		return modules[shimModules[pkg.name] || pkg.name] = index;
 	}
 
 	return false;
 }
  
-Object _(String path, Object modules = {}) {
+Object collect(String path, Object modules = {}) {
 	Array ls = FS.readdirSync(path), handled;
 
 	ls.forEach((file) {
@@ -86,30 +102,33 @@ Object _(String path, Object modules = {}) {
 		}
 
 		if FS.statSync(file = Path.join(path, file)).isDirectory() {
-			_(file, modules);
+			collect(file, modules);
 		}
 	});
 
 	return modules;
 }
 
-void install(String path) {
-	path = Path.join(path, "./browser-shim");
+async Object install(String path) {
+	String shimPath = Path.join(path, "./browser-shim");
 
-	if FS.existsSync(path) {
-		return;
+	if FS.existsSync(shimPath) {
+		resolve collect(path);
 	}
+
+	Object.keys(emptyModules).forEach((String key) {
+		emptyModules[key] = Path.join(shimPath, emptyModules[key]);
+	});
 
 	NPM.load((err) {
 
 		if err {
-			throw err;
+			resolve collect(path);
 		}
 
-	    NPM.commands.install(path, shimModules, (err) {
-	        if err {
-	        	throw err;
-	    	}
+	    NPM.commands.install(shimPath, Object.keys(shimModules), () {
+			FS.writeFileSync(Path.join(shimPath, "empty.js"), "");
+			resolve collect(path, clone emptyModules);
 	    });
 
 	});

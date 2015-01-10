@@ -38,18 +38,16 @@ switch firstArg {
 
     default:
         String output   = "./packages.json",
-               packages = JSON.stringify(drp.resolve(firstArg), null, "\t");
+               packages = JSON.stringify(await drp.installShim(firstArg), null, "\t");
 
         if cli.args[0] == "to" {
             cli.read();
             output = cli.read();
 
-            drp.installShim(path.dirname(output));
             fs.writeFileSync(/\/$/.test(output) 
                 ? "@output/packages.json" 
                 : output, packages, "utf8");
         } else {
-            drp.installShim(path.dirname(output));
             fs.writeFileSync(output, packages, "utf8");
         }
 
