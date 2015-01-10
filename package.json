@@ -2,7 +2,7 @@
     "name": "dr-package",
     "description": "Utility for collecting CommonJS packages for ColaScript.",
     "homepage": "https://github.com/TrigenSoftware/Dr-Package",
-    "version": "0.1.4",
+    "version": "0.1.5",
     "engines": {
         "node": ">=0.4.0"
     },

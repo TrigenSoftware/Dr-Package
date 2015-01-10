@@ -68,7 +68,7 @@ String tryToFindSource(String filename, bool strict = false) {
 void handlePackage(String file, Object modules) {
 	Object pkg  = getJson(file), 
 	       path = Path.dirname(file), index;
-	 
+	
 	if pkg.browser is String && (index = tryToFindSource(Path.join(path, pkg.browser))) {
 		return modules[shimModules[pkg.name] || pkg.name] = index;
 	} 
@@ -90,15 +90,20 @@ void handlePackage(String file, Object modules) {
 }
  
 Object collect(String path, Object modules = {}) {
-	Array ls = FS.readdirSync(path), handled;
+	Array ls = FS.readdirSync(path);
+	String jsonPath = Path.join(path, "package.json");
+
+	if FS.existsSync(jsonPath) {
+		handled = handlePackage(jsonPath, modules);
+	} else
+
+	if FS.existsSync(jsonPath = Path.join(path, "component.json")) {
+		handled = handlePackage(jsonPath, modules);
+	}
 
 	ls.forEach((file) {
 		if file.indexOf(".") == 0 {
 			return;
-		}
-
-		if !handled && (file == "package.json" || file == "component.json") {
-			handled = handlePackage(Path.join(path, file), modules);
 		}
 
 		if FS.statSync(file = Path.join(path, file)).isDirectory() {

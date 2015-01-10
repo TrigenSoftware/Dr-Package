@@ -109,14 +109,17 @@ function handlePackage() {
 
 function collect() {
     var path = arguments[0] !== undefined ? arguments[0] : _ColaRuntime$$error("Argument `path` is required!"), modules = arguments[1] !== undefined ? arguments[1] : {};
-    var ls = FS.readdirSync(path), handled;
+    var ls = FS.readdirSync(path);
+    var jsonPath = Path.join(path, "package.json");
+    if (FS.existsSync(jsonPath)) {
+        handled = handlePackage(jsonPath, modules);
+    } else if (FS.existsSync(jsonPath = Path.join(path, "component.json"))) {
+        handled = handlePackage(jsonPath, modules);
+    }
     ls.forEach(function() {
         var file = arguments[0] !== undefined ? arguments[0] : _ColaRuntime$$error("Argument `file` is required!");
         if (file.indexOf(".") == 0) {
             return;
-        }
-        if (!handled && (file == "package.json" || file == "component.json")) {
-            handled = handlePackage(Path.join(path, file), modules);
         }
         if (FS.statSync(file = Path.join(path, file)).isDirectory()) {
             collect(file, modules);
